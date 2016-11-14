@@ -1,0 +1,17 @@
+{
+  "name": "php-live-reload",
+  "version": "1.0.0",
+  "description": "Live reloading for built in PHP development server",
+  "main": "live-reload-js/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify ./live-reload-js/index.js  --standalone monitorChanges --outfile live-reload.js",
+    "serve": "php -S localhost:3000 -t ../",
+    "start": "npm run build && npm run serve"
+  },
+  "author": "Ryan Tate",
+  "license": "WTFPL",
+  "dependencies": {
+    "superagent": "^2.3.0"
+  }
+}

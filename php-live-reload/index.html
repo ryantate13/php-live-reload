@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PHP Live Reload</title>
+    <script src="/php-live-reload/live-reload.js"></script>
+    <style>
+        #app{
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            min-height:90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        table{
+            border:1px solid black;
+        }
+        td{
+            text-align: center;
+        }
+        tbody {
+            display:block;
+            height:350px;
+            overflow:auto;
+        }
+        thead, tbody tr {
+            display:table;
+            width:100%;
+            table-layout:fixed;/* even columns width , fix width of table too*/
+        }
+        thead {
+            width: calc( 100% - 1em )/* scrollbar is average 1em/16px width, remove it from thead width */
+        }
+        table {
+            width:400px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <table>
+        <thead>
+        <th>Scan Time</th>
+        <th>Change Detected</th>
+        </thead>
+        <tbody id="log"></tbody>
+    </table>
+</div>
+</body>
+<script>
+    var url = '/php-live-reload/live-reload.php';
+    var callback = function(err, res){
+        if(err){
+            console.log(err);
+        }
+        if (res) {
+            if (res.body.time) {
+                var delay = res.body.time;
+                var changed = res.body.changed;
+                if(changed){
+                    console.log('change detected');
+                    window.setTimeout(function(){window.location.reload();}, delay);
+                }
+                else{
+                    var log = document.getElementById('log');
+                    log.innerHTML += '<tr><td>'+ delay + 'ms </td><td>' + changed + '</td></tr>';
+                    log.scrollTop = log.scrollHeight;
+                    monitorChanges(delay, callback, url);
+                }
+            }
+            else{
+                console.log(res);
+            }
+        }
+    };
+    monitorChanges(1000, callback, url);
+</script>
+</html>
