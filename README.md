@@ -180,7 +180,13 @@ monitorChanges();
 ```
 
 ## Building the JavaScript File
-Building live-reload.js requires NPM and Browserify. The following npm scripts are available from the php-live-reload directory.
+Building live-reload.js requires NPM and Browserify.
+
+Install Dependencies:
+
+```cd php-live-reload && npm install```
+
+The following npm scripts are available from the php-live-reload directory.
 
 Build live-reload.js from source file in live-reload-js/index.js:
 
