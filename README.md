@@ -15,14 +15,14 @@ The minimum delay between checks is set by default to 2 * the run time value ret
 ```
 # Project Directory
 Scan Time	Change Detected
-47.949ms	false
-49.777ms	false
-59.459ms	false
-58.094ms	false
-41.692ms	false
-64.171ms	false
-42.682ms	false
-60.56ms		false
+9.678ms		false
+9.388ms		false
+9.375ms		false
+13.102ms	false
+10.341ms	false
+12.498ms	false
+11.853ms	false
+11.101ms	false
 ```
 
 ```
