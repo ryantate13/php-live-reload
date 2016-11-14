@@ -8,7 +8,7 @@ It is tested with Apache and the built in PHP development server but should work
 
 The script uses polling to communicate when changes have occurred. This could be sped up by using web sockets but sockets in PHP require a special extension. I went with polling to keep it as portable as possible.
 
-Tested on a directory with ~21,000 files, the script takes roughly 500ms to generate a hash of each file and to compare with the prior result. On the default project directory, the total time is ~10ms. YMMV.
+Tested on a directory with ~21,000 files, the script takes roughly 500ms to generate a hash of each file and to compare it with the prior result. On the default project directory, the total time is ~10ms. YMMV.
 
 The minimum delay between checks is set by default to 2 * the run time value returned from the last API call, or 1000ms whichever is greater. If hashing the files in the working directory begins to take a long time for a larger project, the time between checks made to the server will grow proportionally.
 
