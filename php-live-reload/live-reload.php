@@ -1,84 +1,46 @@
 <?php
 
+require_once('config.php');
 
 $start = microtime(true);
-
-/*
-    Config:
-    * Extensions to check for changes
-    * Data file to store hash data
-    * Directory to watch for changes
-    * Files exclude list
-    * Function to process files exclude list
-    * Path Exclude list
-    * Function to process path exclude list
-*/
-$extensions = [
-    'php',
-    'js',
-    'html',
-    'css'
-];
-
-$dataFile = __DIR__ . '/live-reload.json';
-
-$watchDir = $_SERVER['DOCUMENT_ROOT'];
-
-$excludeFiles = [];
-
-$excludePaths = [];
-
-$excludeFilesFilter = function($f) use($dataFile, $excludeFiles){
-    $filesToExclude = array_merge([$dataFile], $excludeFiles);
-    return (!in_array($f,$filesToExclude));
-};
-
-$excludePathsFilter = function($path) use($excludePaths){
-    foreach ($excludePaths as $exclude) {
-        if (preg_match($exclude, $path)) {
-            return false;
-        }
-    }
-    return true;
-};
 
 /*
  * Check for changes
  */
 
+$error = false;
+
 if (!touch($dataFile)) {
-    http_send_status(400);
+    $error = true;
     $response = ['error' => 'Cannot write to log file'];
 }
 else{
-    function fileList($dir, $exts){
+    function fileList($dir, $exts, $excludePathsFilter, $excludeFilesFilter){
         $dirs = glob($dir . '/*', GLOB_ONLYDIR|GLOB_NOSORT);
+        $dirs = array_filter($dirs, $excludePathsFilter);
         $files = glob($dir . '/*.{' . implode(",", $exts) . "}", GLOB_BRACE);
+        $files = array_filter($files, $excludeFilesFilter);
         foreach ($dirs as $key => $subDir) {
-            $dirs[$key] = fileList($subDir, $exts);
+            $dirs[$key] = fileList($subDir, $exts, $excludePathsFilter, $excludeFilesFilter);
         }
         $flatten = function($d) { return array_reduce($d, 'array_merge', []); };
         $dirs = $flatten($dirs);
         $files = array_merge($files, $dirs);
-        return $files;
+        return array_unique($files);
     }
 
-    $files = fileList($watchDir, $extensions);
+    $files = fileList($watchDir, $extensions, $excludePathsFilter, $excludeFilesFilter);
 
     if (!$files) {
-        http_send_status(400);
+        $error = true;
         $response = ['error' => 'No files in watch directory'];
     }
     else{
-        $files = array_filter($files, $excludeFilesFilter);
-
-        $files = array_filter($files, $excludePathsFilter);
-
         $hash = json_encode(array_map(function($f){
-            return [$f => hash_file('sha1', $f)];
+            return [$f => hash_file('md4', $f)];
         },$files));
 
-        $changed = $hash != file_get_contents($dataFile);
+        $changed = $hash !== file_get_contents($dataFile);
 
         if($changed){
             file_put_contents($dataFile, $hash);
@@ -90,6 +52,10 @@ else{
 
         $response = ['time' => $ms, 'changed' => $changed];
     }
+}
+
+if ($error) {
+    http_response_code(400);
 }
 
 $response = json_encode($response);

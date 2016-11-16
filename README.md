@@ -27,38 +27,51 @@ Scan Time	Change Detected
 
 ```
 # Default WordPress Installation
- Scan Time	Change Detected
- 96.288ms	false
- 98.005ms	false
- 116.249ms	false
- 96.539ms	false
- 104.836ms	false
- 114.176ms	false
- 99.886ms	false
- 88.264ms	false
+Scan Time	Change Detected
+96.288ms	false
+98.005ms	false
+116.249ms	false
+96.539ms	false
+104.836ms	false
+114.176ms	false
+99.886ms	false
+88.264ms	false
+
+# Just watching wp-content directory
+Scan Time	Change Detected
+6.54ms		false
+13.934ms	false
+11.265ms	false
+14.48ms		false
+9.013ms		false
+15.531ms	false
+11.385ms	false
+13.293ms	false
+11.14ms		false
 ```
 
 ```
 # 779 MB Laravel App with no exclusion defined for /vendor or /node_modules directories
 Scan Time	Change Detected
-5147.079ms	false
-5286.697ms	false
-5023.984ms	false
-4949.01ms	false
-5048.196ms	false
-4906.718ms	false
-4689.192ms	false
+4616.152ms	false
+3954.744ms	false
+3900.697ms	false
+3719.423ms	false
+3706.336ms	false
+3751.862ms	false
+3696.832ms	false
+3686.875ms	false
 
 # The same project with filters in place
-Scan Time   Change Detected
-2024.498ms  false
-2029.01ms   false
-2030.867ms  false
-2044.81ms   false
-2035.575ms  false
-2024.158ms  false
-2040.97ms   false
-2071.742ms  false
+Scan Time	Change Detected
+32.776ms	false
+33.279ms	false
+27.922ms	false
+37.853ms	false
+23.538ms	false
+36.464ms	false
+31.928ms	false
+32.254ms	false
 ```
 
 ## Usage
@@ -81,7 +94,7 @@ Given that running live-reload in production is probably not a great idea anyway
 
 ## Configuring Watch List
 
-The configuration for the script is at the top of ```live-reload.php``` and consists of the following sections:
+The configuration for the script is in ```php-live-reload/config.php``` and consists of the following options:
 
 * Extensions to check for changes
 * Data file to store hash data
@@ -93,11 +106,21 @@ The configuration for the script is at the top of ```live-reload.php``` and cons
 
 The functions which perform the filtering on the supplied values for files and paths to exclude are configurable as user defined values, allowing for more advanced filtering to be performed.
 
-By default, $excludeFiles takes a list of paths, relative to the watch directory's root. Each of these files will be excluded from change detection. $excludePaths takes a list of PCRE regular expressions in a format similar to ```~^dev/foo/bar.*~```. Each path in the watch folder will be checked for a match prior to scanning, and excluded if the pattern matches the full path of the file.
+By default, $excludeFiles takes a list of file paths, relative to the watch directory's root. Each of these files will be excluded from change detection. $excludePaths takes a list of PCRE regular expressions in a format similar to ```~^dev/foo/bar.*~```. Each path in the watch folder will be checked for a match prior to scanning, and excluded if the pattern matches the full path of the file.
 
 The default configuration is listed below.
 
 ```php
+/*
+    Config:
+    * Extensions to check for changes
+    * Data file to store hash data
+    * Directory to watch for changes
+    * Files exclude list
+    * Filter function to process files exclude list
+    * Path Exclude list
+    * Filter function to process path exclude list
+*/
 $extensions = [
     'php',
     'js',
@@ -114,8 +137,8 @@ $excludeFiles = [];
 $excludePaths = [];
 
 $excludeFilesFilter = function($f) use($dataFile, $excludeFiles){
-    $filesToExclude = array_merge([$dataFile], $excludeFiles);
-    return (!in_array($f,$filesToExclude));
+    $excludeFiles[] = $dataFile;
+    return (!in_array($f,$excludeFiles));
 };
 
 $excludePathsFilter = function($path) use($excludePaths){
